@@ -1,0 +1,5 @@
+export PATH="/home/quentin/Projects/idea_man/emsdk:/home/quentin/Projects/idea_man/emsdk/upstream/emscripten:/home/quentin/Projects/idea_man/emsdk/node/12.18.1_64bit/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl"
+export EMSDK="/home/quentin/Projects/idea_man/emsdk"
+export EM_CONFIG="/home/quentin/Projects/idea_man/emsdk/.emscripten"
+export EM_CACHE="/home/quentin/Projects/idea_man/emsdk/upstream/emscripten/cache"
+export EMSDK_NODE="/home/quentin/Projects/idea_man/emsdk/node/12.18.1_64bit/bin/node"

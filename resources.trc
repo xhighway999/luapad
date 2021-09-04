@@ -1,0 +1,10 @@
+{
+"version": 1,
+"project": "app",
+"configs" : [
+{"buildType" : "All",
+  "folder" : "wd"},
+  {"buildType" : "All",
+  "folder" : "res"}
+]
+}

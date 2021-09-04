@@ -1,0 +1,13 @@
+mkdir build && cd build
+source ../setupems.sh
+clear && rm -rf *
+
+
+Release:
+emcmake cmake ../ -Dxhfr_Backend=sdl-ems -DCMAKE_BUILD_TYPE=Release -Dxhfr_json_external=off -Dtrs="/home/quentin/Projects/luapad/build_debug/xhfr/external/trs/trs" ../
+
+
+emcmake cmake ../ -Dxhfr_Backend=sdl-ems -DCMAKE_BUILD_TYPE=Debug -Dxhfr_json_external=off -Dtrs="/home/quentin/Projects/luapad/build-idea_man-Clang_Desktop-Debug/xhfr/external/trs/trs" ../
+
+make -j 20
+python3 -m http.server 8000 --bind 127.0.0.1 

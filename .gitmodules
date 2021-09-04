@@ -1,0 +1,25 @@
+[submodule "xhfr"]
+	path = xhfr
+	url = git@github.com:xhighway999/xhfr.git
+[submodule "tinyide"]
+	path = tinyide
+	url = git@github.com:xhighway999/tinyide.git
+	branch = master
+[submodule "emsdk"]
+	path = emsdk
+	url = https://github.com/emscripten-core/emsdk.git
+[submodule "imgui-node-editor"]
+	path = imgui-node-editor
+	url = git@github.com:thedmd/imgui-node-editor.git
+[submodule "external/cereal"]
+	path = external/cereal
+	url = git@github.com:USCiLab/cereal.git
+[submodule "xhfrnode"]
+	path = xhfrnode
+	url = git@github.com:xhighway999/xhfrnode.git
+[submodule "sol2"]
+	path = sol2
+	url = https://github.com/ThePhD/sol2.git
+[submodule "lua/src"]
+	path = lua/src
+	url = https://github.com/lua/lua.git
