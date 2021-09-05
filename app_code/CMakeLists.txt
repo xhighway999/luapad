@@ -23,7 +23,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
 include_directories(SYSTEM xhfr/external/lua/src/)
 endif()
 
-target_include_directories(app_code PUBLIC "../zep/include")
 target_include_directories(app_code PUBLIC "../lua/src")
 target_include_directories(app_code PUBLIC "../sol2/include")
 target_link_libraries(app_code xhfr TinyIDE liblua sol2)

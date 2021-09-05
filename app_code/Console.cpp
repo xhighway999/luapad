@@ -4,18 +4,16 @@ Console::Console() {
 }
 
 void Console::onDraw() {
+  if (firstFrame) {
+    firstFrame = false;
+    initState();
+  }
 
-
-    if (firstFrame) {
-        firstFrame = false;
-        initState();
-    }
-
-    float iconSize = ImGui::GetFrameHeight();
-    if (ImGui::ImageButton(trashImg.textureID(), ImVec2(iconSize, iconSize),
-                           ImVec2(), ImVec2(1, 1), 0)) {
-      consoleBuffer.clear();
-    }
+  float iconSize = ImGui::GetFrameHeight();
+  if (ImGui::ImageButton(trashImg.textureID(), ImVec2(iconSize, iconSize),
+                         ImVec2(), ImVec2(1, 1), 0)) {
+    consoleBuffer.clear();
+  }
 
   auto footer_height_to_reserve =
       ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemSpacing.y;
@@ -87,10 +85,9 @@ bool Console::isImmediate(const std::string& line) {
   return false;
 }
 
-void Console::addTextToConsole(const std::string &text)
-{
-    consoleBuffer += text;
-    lineChange = true;
+void Console::addTextToConsole(const std::string& text) {
+  consoleBuffer += text;
+  lineChange = true;
 }
 
 const std::string& Console::getHistory() {
@@ -102,29 +99,26 @@ void Console::addLineToConsole(const std::string& line) {
   lineChange = true;
 }
 
-void Console::initState()
-{
+void Console::initState() {
+  (*state)["console_print"] = [this](const std::string& line) {
+    addLineToConsole(line);
+  };
 
-    (*state)["console_print"] = [this](const std::string& line) {
-      addLineToConsole(line);
-    };
+  (*state)["console_puts"] = [this](const std::string& line) {
+    addTextToConsole(line);
+  };
 
-    (*state)["console_puts"] = [this](const std::string& line) {
-      addTextToConsole(line);
-    };
+  auto consolePrintScript =
+      "function print_replacement(x)\n"
+      "if  x ~= nil then\n"
+      "    console_puts(tostring(x))\n"
+      "else\n"
+      "   console_puts(\'nil\')\n"
+      "end\n"
+      "end\n"
+      "print = print_replacement\n";
 
-    auto consolePrintScript =
-        "function print_replacement(x)\n"
-        "if  x ~= nil then\n"
-        "    console_puts(tostring(x))\n"
-        "else\n"
-        "   console_puts(\'nil\')\n"
-        "end\n"
-        "end\n"
-        "print = print_replacement\n";
-
-
-    auto consoleMultiPrint = R"(
+  auto consoleMultiPrint = R"(
 
 function multi_print(...)
 
@@ -138,8 +132,7 @@ print = multi_print
 
     )";
 
-    (*state).script(consolePrintScript);
+  (*state).script(consolePrintScript);
 
-    (*state).script(consoleMultiPrint);
+  (*state).script(consoleMultiPrint);
 }
-

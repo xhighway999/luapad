@@ -3,10 +3,10 @@
 #include "xhfr.hpp"
 
 #include "AboutWindow.hpp"
+#include "Console.hpp"
 #include "TinyIDE.hpp"
 #include "ToolBar.hpp"
 #include "sol/sol.hpp"
-#include "Console.hpp"
 
 class App {
  public:

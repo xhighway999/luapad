@@ -1,12 +1,11 @@
 #pragma once
 
-#include "xhfr.hpp"
 #include "sol/sol.hpp"
-class Console : public xhfr::Window  {
+#include "xhfr.hpp"
+class Console : public xhfr::Window {
  public:
   Console();
   virtual void onDraw() override;
-
 
   sol::state* state;
 
@@ -27,4 +26,3 @@ class Console : public xhfr::Window  {
   std::array<std::string, 3> history = {"A", "B", "C"};
   xhfr::Image trashImg = xhfr::Image(":/res/app/icons/trash.png");
 };
-

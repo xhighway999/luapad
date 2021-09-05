@@ -1,5 +1,7 @@
 #include "App.hpp"
-
+#ifdef EMSCRIPTEN
+#include "core/EmscriptenExtentions.hpp"
+#endif
 #include "../data.c"
 
 void setupRetroTheme() {
@@ -91,31 +93,25 @@ void App::init(int argc, char* argv[], const char* appName, int w, int h) {
   XHFR_DEBUG("XHFR INIT COMPLETE");
 
   ImFontConfig cfg;
-  //float sampling = 1.6;
-
+  // float sampling = 1.6;
 
   PHYSFS_mountMemory(data, data_len, nullptr, "compressed.zip", "/res/", 0);
   PHYSFS_mount("./", "/", 0);
   PHYSFS_setWriteDir("./");
   XHFR_DEBUG("MOUNTING COMPLETE");
 
-
-
-
-
-  ImFont* fcfg = xhfr::FontManager::getInstance().addFont(":res/app/fonts/Cantarell.ttf",16,&cfg);
+  ImFont* fcfg = xhfr::FontManager::getInstance().addFont(
+      ":res/app/fonts/Cantarell.ttf", 16, &cfg);
   xhfr::FontManager::getInstance().addDefaultFont();
-  fcfg->Scale = 1.f ;///512.f;
+  fcfg->Scale = 1.f;  /// 512.f;
 
   ImGuiIO& io = ImGui::GetIO();
 
   zw = std::make_shared<TinyIDE>();
   zw->setFont(io.Fonts->Fonts[1]);
 
-
   toolBar = std::make_shared<ToolBar>();
   console = std::make_shared<Console>();
-
 
   toolBar->hideCloseButton(true);
   console->hideCloseButton(true);
@@ -131,37 +127,39 @@ void App::init(int argc, char* argv[], const char* appName, int w, int h) {
   auto data = f.readAll();
   ImGui::LoadIniSettingsFromMemory(data.c_str(), data.size());
 
-  toolBar->clearStateHandler = [this](){
-      luaState = sol::state();
-      luaState.open_libraries();
-      console->initState();
-      console->addLineToConsole("--Lua state cleared--");
+  toolBar->clearStateHandler = [this]() {
+    luaState = sol::state();
+    luaState.open_libraries();
+    console->initState();
+    console->addLineToConsole("--Lua state cleared--");
   };
 
-  toolBar->runHandler = [this](){
-      auto doc = zw->getDocuments()[0];
-      auto code = doc->text();
-      try {
-          luaState.script(code);
-      }  catch (std::exception& e) {
-        console->addLineToConsole(e.what());
-      }
+  toolBar->runHandler = [this]() {
+    auto doc = zw->getDocuments()[0];
+    auto code = doc->text();
+    try {
+      luaState.script(code);
+    } catch (std::exception& e) {
+      console->addLineToConsole(e.what());
+    }
 
-      console->addLineToConsole("-- Program finished --\n");
+    console->addLineToConsole("-- Program finished --\n");
   };
+
+  zw->setSaveFileCallback(
+      [](const std::shared_ptr<TinyIDE::Document>& document) {
+        auto text = document->text();
+#ifdef EMSCRIPTEN
+        xhfr::emscripten_download_data(text.c_str(), text.size(), "code.lua");
+#endif
+      });
 
   auto code = R"(-- LuaPad free online lua sandbox
 -- Copyright 2021 Quentin Kammann
---Luapad v.0.5.2
+--Luapad v0.6.1
 --Changelog:
---Fixed Copy/Paste (Only works on Chrome as Firefox hasn't implemented the clipboard api properly)
---Can't close windows anymore
---Show a version number
---added CTRL + / shortcut to comment / uncomment code
---added a button to reset the lua state
---added a button to clear the console
---changed the run icon
---minor fixes
+--      *Fixed file saving (CTRL + S downloads the current buffer)
+--      *Implemented CTRL + BACKSPACE / CTRL + DELETE shortcut to delete whole words
 print("Hello World !")
 
 function fib(m)
@@ -175,44 +173,96 @@ end
 print("Fib 13 is", fib(13))
     )";
 
-  zw->create("SCRATCHPAD", {TinyIDE::DocumentOptions::Lua},code);
+  zw->create("SCRATCHPAD", {TinyIDE::DocumentOptions::Lua}, code);
   luaState.open_libraries();
-  zw->addShortcut([this](){
-      toolBar->runHandler();
+  zw->addShortcut(
+      [this]() {
+        toolBar->runHandler();
+      },
+      XHFR_KEY(ENTER), true);
 
-  },XHFR_KEY(ENTER),true);
+  // shortcuts
+  {
+    zw->addShortcut(
+        [this]() {
+          auto doc = zw->getDocuments()[0];
+          auto pos = doc->editor.GetCursorPosition();
+          auto line = doc->editor.GetCurrentLineText();
 
-  zw->addShortcut([this](){
+          // swap comment stuff
+          bool addCommentMark = true;
+          if (line.length() > 1) {
+            if (line[0] == '-' && line[1] == '-') {
+              addCommentMark = false;
+            }
+          }
+          if (addCommentMark) {
+            line = "--" + line;
+          } else {
+            line = line.substr(2);
+          }
+          auto lines = doc->editor.GetTextLines();
+          lines[pos.mLine] = line;
+          doc->editor.SetTextLines(lines);
+          // end swap
+        },
+        XHFR_KEY(SLASH), true);
+
+    auto deleteWord = [this]() {
       auto doc = zw->getDocuments()[0];
+
       auto pos = doc->editor.GetCursorPosition();
       auto line = doc->editor.GetCurrentLineText();
-
-      //swap comment stuff
-      bool addCommentMark = true;
-      if (line.length()>1) {
-          if (line[0] == '-' && line[1] =='-') {
-              addCommentMark = false;
-          }
-      }
-      if (addCommentMark) {
-          line = "--" + line;
-      }
-      else {
-          line = line.substr(2);
-      }
       auto lines = doc->editor.GetTextLines();
+
+      auto& editor = doc->editor;
+
+      if (pos.mColumn == 0) {
+        editor.Delete();
+        return;
+      }
+
+      if (line.size() < 2) {
+        lines.erase(lines.begin() + pos.mLine);
+        editor.SetTextLines(lines);
+        editor.MoveUp();
+        editor.MoveEnd();
+        return;
+      }
+
+      // start from the right side of the word and stop when a delimiter is
+      // found
+      size_t wordStartPosition = 0;
+      for (int i = pos.mColumn - 1; i != 0; --i) {
+        std::vector<char> delimiters({' ', '(', ')'});
+        if (std::any_of(delimiters.begin(), delimiters.end(),
+                        [character = line[i]](char delimiter) {
+                          return character == delimiter;
+                        })) {
+          wordStartPosition = i;
+          break;
+        }
+      }
+      auto len = pos.mColumn - wordStartPosition;
+      editor.MoveLeft(len);
+
+      // remove the word from the current line
+      line.erase(wordStartPosition, len);
+
+      // change the document
       lines[pos.mLine] = line;
       doc->editor.SetTextLines(lines);
-      //end swap
+    };
+    zw->addShortcut(
+        [this, deleteWord]() {
+          deleteWord();
+        },
+        XHFR_KEY(BACKSPACE), true);
 
-
-  },XHFR_KEY(SLASH),true);
-
-
-
-
+    zw->addShortcut(
+        [this, deleteWord]() {
+          deleteWord();
+        },
+        XHFR_KEY(DELETE), true);
+  }
 }
-
-
-
-

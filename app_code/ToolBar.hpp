@@ -4,12 +4,12 @@
 
 class ToolBar : public xhfr::Window {
  public:
-    ToolBar();
+  ToolBar();
   virtual void onDraw();
   virtual void onClosePressed() { setVisible(false); }
-std::function<void()> runHandler;
-std::function<void()> clearStateHandler;
- private:
+  std::function<void()> runHandler;
+  std::function<void()> clearStateHandler;
 
-xhfr::Image trashImg = xhfr::Image(":/res/app/icons/play.png");
+ private:
+  xhfr::Image trashImg = xhfr::Image(":/res/app/icons/play.png");
 };
