@@ -11,7 +11,6 @@
   </p>
   
   <p align="center">
-    <a href="https://github.com/xhighway999/LuaPad">View Demo</a>
     <a href="https://github.com/xhighway999/LuaPad/issues">Report Bug</a>
     <a href="https://github.com/xhighway999/LuaPad/issues">Request Feature</a>
 </p>
