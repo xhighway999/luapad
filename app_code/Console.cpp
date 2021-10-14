@@ -10,7 +10,7 @@ void Console::onDraw() {
   }
 
   float iconSize = ImGui::GetFrameHeight();
-  if (ImGui::ImageButton(trashImg.textureID(), ImVec2(iconSize, iconSize),
+  if (ImGui::ImageButtonWithText(trashImg.textureID(), "Clear Console",ImVec2(iconSize, iconSize),
                          ImVec2(), ImVec2(1, 1), 0)) {
     consoleBuffer.clear();
   }
@@ -22,7 +22,8 @@ void Console::onDraw() {
   ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve * 2),
                     true, ImGuiWindowFlags_HorizontalScrollbar);
 
-  ImGui::TextUnformatted(consoleBuffer.c_str());
+  ImGui::InputTextMultiline("##HIDDEN",consoleBuffer,ImVec2(-1,-1),ImGuiInputTextFlags_ReadOnly);
+  //ImGui::TextUnformatted(consoleBuffer.c_str());
   if (lineChange) {
     ImGui::SetScrollHereY(1);
     lineChange = false;
