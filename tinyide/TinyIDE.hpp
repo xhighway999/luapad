@@ -3,7 +3,9 @@
 
 #include <functional>
 #include <vector>
+#include <atomic>
 
+#include <thread>
 #include "ImGuiColorTextEdit/TextEditor.h"
 #include "xhfr.hpp"
 
@@ -46,7 +48,10 @@ class TinyIDE : public xhfr::Window {
 
   void setFont(ImFont* newFont);
 
+  void useDarkTheme(bool t = true);
+
  private:
+
   void handleShortcuts();
   std::function<void(const std::shared_ptr<Document>&)> saveFileCallback;
   std::vector<std::shared_ptr<Document>> documents;

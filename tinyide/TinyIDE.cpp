@@ -115,5 +115,19 @@ void TinyIDE::handleShortcuts() {
 }
 
 void TinyIDE::setFont(ImFont* newFont) {
-  font = newFont;
+    font = newFont;
+}
+
+void TinyIDE::useDarkTheme(bool t)
+{
+    TextEditor::Palette p;
+    p = TextEditor::GetLightPalette();
+    if (t) {
+        p = TextEditor::GetDarkPalette();
+    }
+
+    for (auto& doc : documents) {
+        auto& te = doc->editor;
+        te.SetPalette(p);
+    }
 }
