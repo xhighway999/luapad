@@ -7,6 +7,7 @@
 #include "TinyIDE.hpp"
 #include "ToolBar.hpp"
 #include "sol/sol.hpp"
+#include "ExecutionEngine.hpp"
 
 class App {
  public:
@@ -16,4 +17,5 @@ class App {
   std::shared_ptr<ToolBar> toolBar;
   std::shared_ptr<Console> console;
   sol::state luaState;
+  ExecutionEngine execEngine;
 };

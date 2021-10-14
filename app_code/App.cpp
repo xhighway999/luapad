@@ -134,16 +134,29 @@ void App::init(int argc, char* argv[], const char* appName, int w, int h) {
     console->addLineToConsole("--Lua state cleared--");
   };
 
+
+  //this will be executed on run
   toolBar->runHandler = [this]() {
     auto doc = zw->getDocuments()[0];
     auto code = doc->text();
-    try {
-      luaState.script(code);
-    } catch (std::exception& e) {
-      console->addLineToConsole(e.what());
-    }
 
-    console->addLineToConsole("-- Program finished --\n");
+        execEngine.setTask([code,this](){
+            try {
+            toolBar->setRunning(true);
+            luaState.script(code);
+            toolBar->setRunning(false);
+            console->addLineToConsole("-- Program execution ended --\n");
+            } catch (std::exception& e) {
+                console->addLineToConsole(e.what());
+            }
+        });
+
+    console->addLineToConsole("-- Program execution started --\n");
+  };
+
+
+  toolBar->changeColorHandler = [this](bool useDark){
+      zw->useDarkTheme(useDark);
   };
 
   zw->setSaveFileCallback(
@@ -156,10 +169,12 @@ void App::init(int argc, char* argv[], const char* appName, int w, int h) {
 
   auto code = R"(-- LuaPad free online lua sandbox
 -- Copyright 2021 Quentin Kammann
---Luapad v0.6.1
+--Luapad v0.9.1
 --Changelog:
---      *Fixed file saving (CTRL + S downloads the current buffer)
---      *Implemented CTRL + BACKSPACE / CTRL + DELETE shortcut to delete whole words
+--    *add running program indicator
+--    *make console copyable
+--    *add a white mode
+--    *add text to clear console button
 print("Hello World !")
 
 function fib(m)
@@ -172,6 +187,10 @@ end
 
 print("Fib 13 is", fib(13))
     )";
+
+  xhfr::addUserFunction([](){
+
+  });
 
   zw->create("SCRATCHPAD", {TinyIDE::DocumentOptions::Lua}, code);
   luaState.open_libraries();
