@@ -30,7 +30,7 @@ void ToolBar::onDraw() {
     clearStateHandler();
   }
   ImGui::SameLine();
-  ImGui::Text("LuaPad v0.9.1");
+  ImGui::Text("LuaPad v0.10.0");
   ImColor link_color(255, 0, 0);
 
   ImGui::SameLine();
@@ -52,13 +52,21 @@ void ToolBar::onDraw() {
   }
 
   static bool lightTheme = as.value("/gui/useLightTheme",false);
-  static bool useLightThemeFirst = true;
-  if (lightTheme && useLightThemeFirst) {
-      useLightThemeFirst = false;
-      changeColorHandler(!lightTheme);
-    if (lightTheme) {
-      ImGui::StyleColorsLight();
-    }
+  static float fontScale = as.value("/gui/fontScale", 1.0f);
+  static bool firstLoad = true;
+  if ( firstLoad) {
+      firstLoad = false;
+      if (lightTheme) {
+          changeColorHandler(!lightTheme);
+        if (lightTheme) {
+          ImGui::StyleColorsLight();
+        }
+      }
+
+      auto& io = ImGui::GetIO();
+      io.FontGlobalScale = fontScale;
+
+
 
   }
   if (ImGui::BeginPopup("SETTINGS")) {
@@ -71,6 +79,15 @@ void ToolBar::onDraw() {
       if (lightTheme) {
         ImGui::StyleColorsLight();
       }
+
+      if (ImGui::SliderFloat("Font Scale",&fontScale,0.5,4)) {
+          as.setValue("/gui/fontScale",fontScale);
+
+          auto& io = ImGui::GetIO();
+          io.FontGlobalScale = fontScale;
+
+      }
+
       ImGui::EndPopup();
   }
 

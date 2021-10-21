@@ -101,9 +101,14 @@ void App::init(int argc, char* argv[], const char* appName, int w, int h) {
   XHFR_DEBUG("MOUNTING COMPLETE");
 
   ImFont* fcfg = xhfr::FontManager::getInstance().addFont(
-      ":res/app/fonts/Cantarell.ttf", 16, &cfg);
-  xhfr::FontManager::getInstance().addDefaultFont();
-  fcfg->Scale = 1.f;  /// 512.f;
+      ":res/app/fonts/Cantarell.ttf", 64, &cfg);
+
+
+  ImFont* fcfg2 = xhfr::FontManager::getInstance().addFont(
+      ":res/app/fonts/SourceCodePro.ttf", 64, &cfg);
+
+  fcfg->Scale = 0.25f;  /// 512.f;
+  fcfg2->Scale = 0.25f;
 
   ImGuiIO& io = ImGui::GetIO();
 
@@ -169,12 +174,10 @@ void App::init(int argc, char* argv[], const char* appName, int w, int h) {
 
   auto code = R"(-- LuaPad free online lua sandbox
 -- Copyright 2021 Quentin Kammann
---Luapad v0.9.1
+--Luapad v0.10.0
 --Changelog:
---    *add running program indicator
---    *make console copyable
---    *add a white mode
---    *add text to clear console button
+--    *add font scaling
+--    *add icon
 print("Hello World !")
 
 function fib(m)
